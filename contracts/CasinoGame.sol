@@ -34,7 +34,7 @@ contract CasinoGame is Ownable {
         if (_number == secretNumber) {
             /// @dev this is a simple way to calculate the reward. In real world, you may want to track reward balance in a local variable since people can send ETH to this contract bypassing the guess() function
             uint256 ethReward = (address(this).balance * WINNER_SHARE) / 100;
-            uint256 erc20Reward = (ERC20_REWARD) * (10 ^ 18);
+            uint256 erc20Reward = (ERC20_REWARD) * (10 ** 18);
 
             (bool ethSuccess, ) = address(msg.sender).call{value: ethReward}(
                 ""

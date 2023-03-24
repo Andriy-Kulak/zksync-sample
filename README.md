@@ -1,19 +1,9 @@
-https://goerli.explorer.zksync.io/address/0x088642B025CFCD5006Cd6459BcBE008DC88D424a
+## Overview
 
-ZkSync Bridge:
+This is Casino Game. Deployed Contracts:
 
-- https://portal.zksync.io/bridge
-- https://goerli.portal.zksync.io/bridge
-
-- verify contracts
-- https://era.zksync.io/docs/dev/building-on-zksync/contracts/contract-verification.html
-
-Things to do:
-
-- verify contract
-  - https://era.zksync.io/docs/api/hardhat/hardhat-zksync-verify.html#installation
-- create a simple ERC20 contract to play with.
-- Figure out a way to bridge the assets
+- MyCoin was deployed to [0xC2c6864bcf1cd4d3A126f1201dA668ba18841D7A](https://goerli.explorer.zksync.io/address/0xa74b31DA52977d5d017B32e5f97aC128C24c6ffd#contrac)
+- CasinoGame was deployed to [0x7Eb58E4405c01A47Da2075975fFD1dD75295C043](https://goerli.explorer.zksync.io/address/0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e#contract)
 
 ## Steps
 
@@ -46,6 +36,3 @@ npx hardhat verify --network zkSyncTestnet {MyCoin address}
 npx hardhat verify --network zkSyncTestnet {CasinoGame address} {MyCoin address} 42
 
 ```
-
-MyCoin was deployed to [0xa74b31DA52977d5d017B32e5f97aC128C24c6ffd](https://goerli.explorer.zksync.io/address/0xa74b31DA52977d5d017B32e5f97aC128C24c6ffd#contrac)
-CasinoGame was deployed to [0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e](https://goerli.explorer.zksync.io/address/0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e#contract)

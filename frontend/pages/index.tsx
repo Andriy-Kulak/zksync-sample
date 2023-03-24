@@ -1,75 +1,68 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import * as ethers from "ethers";
-import { Contract, Web3Provider, Provider, Wallet } from "zksync-web3";
+import { Contract, Web3Provider } from "zksync-web3";
 import casinoGameAbi from "../utils/casinoGameAbi.json";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import BigNumber from "bignumber.js";
 import useGameInit from "../hooks/useGameInit";
-
-const winnerTopicHash =
-  "0x9c2270628a9b29d30ae96b6c4c14ed646ee134febdce38a5b77f2bde9cea2e20";
-const ZKS_SYNC_GOERLI_TESTNET = 280;
+import {
+  CASINO_GAME_ADDRESS,
+  WINNER_TOPIC_HASH,
+  ZKS_SYNC_GOERLI_TESTNET,
+} from "../constants";
 
 const Home: NextPage = () => {
-  const casinGameAddress = "0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e";
-
   const [numberGuessed, setNumberGuessed] = useState<number | undefined>(
     undefined
   );
-
   const { gameState, setGameState } = useGameInit();
 
-  // console.log("gameState?.chainId", gameState?.chainId);
-
   const guessNumber = async (number: number | undefined) => {
-    if (window?.ethereum) {
-      const provider = new Web3Provider(window?.ethereum);
+    const provider = new Web3Provider(window?.ethereum);
 
-      const signer = provider.getSigner();
-      const contract = new Contract(casinGameAddress, casinoGameAbi, signer);
-      const options = { value: ethers.utils.parseEther("0.001") };
-      const tx = await contract.guess(number, options);
+    const signer = provider.getSigner();
+    const contract = new Contract(CASINO_GAME_ADDRESS, casinoGameAbi, signer);
+    const options = { value: ethers.utils.parseEther("0.001") };
+    const tx = await contract.guess(number, options);
 
+    window.alert(
+      `Transaction submitted! You can check status on https://goerli.explorer.zksync.io/tx/${tx.hash}`
+    );
+
+    const receipt = await tx.wait();
+    let isWinner = false;
+    receipt.logs?.forEach((log: any) => {
+      if (log.topics[0] == WINNER_TOPIC_HASH) {
+        console.log("winner :-)");
+        isWinner = true;
+      }
+    });
+
+    if (isWinner) {
       window.alert(
-        `Transaction submitted! You can check status on https://goerli.explorer.zksync.io/tx/${tx.hash}`
+        `You won! Check your wallet tx hash https://goerli.explorer.zksync.io/tx/${tx.hash}`
       );
-
-      tx.wait().then(async (receipt: any) => {
-        let isWinner = false;
-        receipt.logs?.forEach((log: any) => {
-          if (log.topics[0] == winnerTopicHash) {
-            console.log("loooser :=)");
-            isWinner = true;
-          }
-        });
-
-        if (isWinner) {
-          window.alert(
-            `You won! Check your wallet tx hash https://goerli.explorer.zksync.io/tx/${tx.hash}`
-          );
-        } else {
-          window.alert(
-            `You lost! Try again! tx hash https://goerli.explorer.zksync.io/tx/${tx.hash}`
-          );
-        }
-
-        const casinoBalance = await provider.getBalance(casinGameAddress);
-
-        setGameState({
-          ...gameState,
-          casinoBalance: casinoBalance.toString(),
-        });
-
-        setNumberGuessed(undefined);
-      });
+    } else {
+      window.alert(
+        `You lost! Try again! tx hash https://goerli.explorer.zksync.io/tx/${tx.hash}`
+      );
     }
+
+    const casinoBalance = await provider.getBalance(CASINO_GAME_ADDRESS);
+
+    setGameState({
+      ...gameState,
+      casinoBalance: casinoBalance.toString(),
+    });
+
+    setNumberGuessed(undefined);
   };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
       <Head>
-        <title>Create Next App</title>
+        <title>Casino Game</title>
       </Head>
 
       <div className="space-y-10 divide-y divide-gray-900/10">

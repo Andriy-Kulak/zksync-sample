@@ -19,7 +19,7 @@ const Home: NextPage = () => {
   const { gameState, setGameState } = useGameInit();
 
   const guessNumber = async (number: number | undefined) => {
-    const provider = new Web3Provider(window?.ethereum) as Provider;
+    const provider = new Web3Provider(window?.ethereum) as any;
 
     const signer = provider.getSigner();
     const contract = new Contract(CASINO_GAME_ADDRESS, casinoGameAbi, signer);

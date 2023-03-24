@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Contract, Web3Provider, Provider, Wallet } from "zksync-web3";
+import { Web3Provider, Wallet, Provider } from "zksync-web3";
 import { CASINO_GAME_ADDRESS } from "../constants";
 
 const useGameInit = () => {
@@ -21,7 +21,7 @@ const useGameInit = () => {
         const casinoBalance = await provider.getBalance(CASINO_GAME_ADDRESS);
         const isMetaMaskConnected = async () => {
           // web 3 provider doesn't recognize metamask's listAccounts so we have to cast it to any
-          const accounts = await provider.listAccounts();
+          const accounts = await (provider as any).listAccounts();
           return accounts.length > 0;
         };
 

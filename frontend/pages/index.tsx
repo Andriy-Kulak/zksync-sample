@@ -6,6 +6,7 @@ import casinoGameAbi from "../utils/casinoGameAbi.json";
 import { useState } from "react";
 import BigNumber from "bignumber.js";
 import useGameInit from "../hooks/useGameInit";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   CASINO_GAME_ADDRESS,
   WINNER_TOPIC_HASH,
@@ -19,6 +20,10 @@ const Home: NextPage = () => {
   const { gameState, setGameState } = useGameInit();
 
   const guessNumber = async (number: number | undefined) => {
+    if (!number) {
+      return window.alert("Please enter a number");
+    }
+
     const provider = new Web3Provider(window?.ethereum) as any;
 
     const signer = provider.getSigner();
@@ -88,6 +93,10 @@ const Home: NextPage = () => {
           <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
             <div className="px-4 py-6 sm:p-8">
               <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                <div className="col-span-full">
+                  <ConnectButton />
+                </div>
+
                 <div className="col-span-full">
                   <h3>
                     <b>

@@ -2,6 +2,7 @@
 
 This is Casino Game. Deployed Contracts:
 
+- web app deployed to [https://zksync-sample.vercel.app/](https://zksync-sample.vercel.app/)
 - MyCoin was deployed to [0xC2c6864bcf1cd4d3A126f1201dA668ba18841D7A](https://goerli.explorer.zksync.io/address/0xa74b31DA52977d5d017B32e5f97aC128C24c6ffd#contrac)
 - CasinoGame was deployed to [0x7Eb58E4405c01A47Da2075975fFD1dD75295C043](https://goerli.explorer.zksync.io/address/0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e#contract)
 - Lucky Number is 42
@@ -15,7 +16,7 @@ This is Casino Game. Deployed Contracts:
 1. Run `git clone https://github.com/Andriy-Kulak/zksync-sample.git`
 2. Run `npm install` at the root folder. Please make sure you have `npm` and `node.js` installed. Look [here](https://nodejs.org/) for more details.
 3. Ensure you have a metamask account setup so you can deploy & interact with contract. [Reference](https://support.metamask.io/hc/en-us/articles/360015489531-Getting-started-with-MetaMask)
-4. create `.env` in root folder based on `.env.example` file and add ethescan api key and private key there, specifically `ZKS_PRIVATE_KEY` &
+4. create `.env` in root folder based on `.env.example` file and add ethescan api key and private key there, specifically `ZKS_PRIVATE_KEY` & `ETHERSCAN_API_KEY`
 
 - to generate private key from metamask, refer to [this](https://support.metamask.io/hc/en-us/articles/360015289632-How-to-export-an-account-s-private-key#:~:text=On%20the%20account%20page%2C%20click,click%20%E2%80%9CConfirm%E2%80%9D%20to%20proceed.) article
 - to gerenate etherscan api key, go to [ethescan.io](https://etherscan.io/), generate a new key and paste it
@@ -41,3 +42,5 @@ npx hardhat verify --network zkSyncTestnet {MyCoin address}
 npx hardhat verify --network zkSyncTestnet {CasinoGame address} {MyCoin address} 42
 
 ```
+
+Congrats! You have now deployed the contract. You can interact with front-end on [https://zksync-sample.vercel.app/](https://zksync-sample.vercel.app/) and get some ideas.

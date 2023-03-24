@@ -7,4 +7,4 @@ Deployed [https://zksync-sample.vercel.app/](https://zksync-sample.vercel.app/)
 1. `npm install`
 2. `npm run dev`
 
-This repo is using tailwind css, next.js + typescript
+This repo is using tailwind css, rainbowkit, ethers, next.js + typescript

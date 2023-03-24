@@ -5,66 +5,20 @@ import { Contract, Web3Provider, Provider, Wallet } from "zksync-web3";
 import casinoGameAbi from "../utils/casinoGameAbi.json";
 import { useEffect, useState } from "react";
 import BigNumber from "bignumber.js";
+import useGameInit from "../hooks/useGameInit";
 
-// it wasn't clear to me how to easily parse reciept events so I ended up using the topic hashes I saw in logs to determine if the user won or lost
-const loserTopicHash =
-  "0x190d4f1249f2e21343a1c0910c21ea36d8a8686a1596352ecc15c4d26a988dcd";
 const winnerTopicHash =
   "0x9c2270628a9b29d30ae96b6c4c14ed646ee134febdce38a5b77f2bde9cea2e20";
 const ZKS_SYNC_GOERLI_TESTNET = 280;
 
 const Home: NextPage = () => {
-  const erc20address = "";
   const casinGameAddress = "0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e";
-  const [gameState, setGameState] = useState<{
-    isMetaMaskConnected: boolean;
-    chainId: number | undefined;
-    casinoBalance: string;
-  }>({
-    isMetaMaskConnected: false,
-    casinoBalance: "",
-    chainId: undefined,
-  });
+
   const [numberGuessed, setNumberGuessed] = useState<number | undefined>(
     undefined
   );
 
-  useEffect(() => {
-    (async () => {
-      // Client-side-only code
-      if (window?.ethereum) {
-        const provider = new Web3Provider(window?.ethereum);
-        const signer = provider.getSigner();
-        const contract = new Contract(casinGameAddress, casinoGameAbi, signer);
-        console.log("contract ", contract);
-
-        const casinoBalance = await provider.getBalance(casinGameAddress);
-        const isMetaMaskConnected = async () => {
-          const accounts = await provider.listAccounts();
-          return accounts.length > 0;
-        };
-        console.log("is metamask connected", {
-          isMetaMaskConnected: await isMetaMaskConnected(),
-          casinoBalance: casinoBalance.toString(),
-        });
-
-        const network = await provider.getNetwork();
-
-        setGameState({
-          isMetaMaskConnected: await isMetaMaskConnected(),
-          chainId: network.chainId,
-          casinoBalance: casinoBalance.toString(),
-        });
-
-        window?.ethereum.on("chainChanged", () => {
-          window.location.reload();
-        });
-        window?.ethereum.on("accountsChanged", () => {
-          window.location.reload();
-        });
-      }
-    })();
-  }, []);
+  const { gameState, setGameState } = useGameInit();
 
   // console.log("gameState?.chainId", gameState?.chainId);
 
@@ -80,13 +34,10 @@ const Home: NextPage = () => {
       window.alert(
         `Transaction submitted! You can check status on https://goerli.explorer.zksync.io/tx/${tx.hash}`
       );
-      console.log("tx ", tx);
+
       tx.wait().then(async (receipt: any) => {
-        console.log("receipt ", receipt);
-        let iface = new ethers.utils.Interface(casinoGameAbi);
         let isWinner = false;
         receipt.logs?.forEach((log: any) => {
-          console.log("log.topics[0]", log.topics[0]);
           if (log.topics[0] == winnerTopicHash) {
             console.log("loooser :=)");
             isWinner = true;
@@ -147,14 +98,14 @@ const Home: NextPage = () => {
                 <div className="col-span-full">
                   <h3>
                     <b>
-                      {ethers.utils.formatEther(gameState.casinoBalance || "0")}
+                      {ethers.utils.formatEther(gameState.casinoBalance || 0)}
                     </b>
                     ETH in casino
                   </h3>
                   <h3>
                     <b>
                       {ethers.utils.formatEther(
-                        BigNumber(gameState.casinoBalance || "0")
+                        BigNumber(gameState.casinoBalance || 0)
                           .multipliedBy(0.8)
                           .toString()
                       )}

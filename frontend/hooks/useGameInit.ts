@@ -20,7 +20,6 @@ const useGameInit = () => {
 
         const casinoBalance = await provider.getBalance(CASINO_GAME_ADDRESS);
         const isMetaMaskConnected = async () => {
-          // web 3 provider doesn't recognize metamask's listAccounts so we have to cast it to any
           const accounts = await provider.listAccounts();
 
           return accounts.length > 0;

@@ -91,7 +91,7 @@ const Home: NextPage = () => {
                 <div className="col-span-full">
                   <h3>
                     <b>
-                      {ethers.utils.formatEther(gameState.casinoBalance || 0)}
+                      {ethers.utils.formatEther(gameState.casinoBalance || 0)}{" "}
                     </b>
                     ETH in casino
                   </h3>
@@ -101,7 +101,7 @@ const Home: NextPage = () => {
                         BigNumber(gameState.casinoBalance || 0)
                           .multipliedBy(0.8)
                           .toString()
-                      )}
+                      )}{" "}
                     </b>
                     ETH you can win :-)
                   </h3>

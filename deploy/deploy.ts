@@ -27,11 +27,6 @@ export default async function (hre: HardhatRuntimeEnvironment) {
 
   const myCoinContract = await deployer.deploy(myCoinArtifact, []);
 
-  // //obtain the Constructor Arguments
-  // console.log(
-  //   "erc20 constructor args:" + myCoinContract.interface.encodeDeploy([])
-  // );
-
   console.log(
     `${myCoinArtifact.contractName} was deployed to ${myCoinContract.address}`
   );
@@ -39,25 +34,17 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   // for testing & info purposes only. please don't pass secrets into the contract
   const secretNumber = 42;
 
-  // console.log(
-  //   "casinoGameArtifact",
-  //   JSON.stringify(casinoGameArtifact.abi, null, 2)
-  // );
   // deploy CasinoGame
   const casinoGameContract = await deployer.deploy(casinoGameArtifact, [
-    // "test",
     myCoinContract.address,
     secretNumber,
   ]);
 
-  // console.log(
-  //   "casino game constructor args:" +
-  //     casinoGameContract.interface.encodeDeploy([])
-  // );
-
   console.log(
     `${casinoGameArtifact.contractName} was deployed to ${casinoGameContract.address}`
   );
+
+  console.log("minting 1_000_000 tokens to the casino game...");
 
   // transfer 1_000_000 tokens to the casino game
   const tx = await myCoinContract
@@ -66,10 +53,6 @@ export default async function (hre: HardhatRuntimeEnvironment) {
       casinoGameContract.address,
       ethers.utils.parseEther("1000000")
     );
-
-  console.log("minting 1_000_000 tokens to the casino game...");
-
-  // await tx.wait();
 
   console.log("minting completed...");
 }

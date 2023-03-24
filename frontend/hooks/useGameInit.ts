@@ -18,13 +18,6 @@ const useGameInit = () => {
       // Client-side-only code
       if (window?.ethereum) {
         const provider = new Web3Provider(window?.ethereum);
-        const signer = provider.getSigner();
-        const contract = new Contract(
-          CASINO_GAME_ADDRESS,
-          casinoGameAbi,
-          signer
-        );
-        console.log("contract ", contract);
 
         const casinoBalance = await provider.getBalance(CASINO_GAME_ADDRESS);
         const isMetaMaskConnected = async () => {

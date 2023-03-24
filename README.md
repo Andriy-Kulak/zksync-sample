@@ -27,4 +27,25 @@ Things to do:
 
 5. `npx hardhat compile` to generate types and artifacts for contract
 
-MyCoin was deployed to 0x7a8D38cfE88d9d942240631E3b354Bd5D57bB5c1
+6. `npx hardhat deploy-zksync` to deploy the contract
+
+7. Check the logs and you should have 2 successful deployed contracts:
+
+```
+MyCoin was deployed to 0x...
+CasinoGame was deployed to 0x...
+
+```
+
+Now it is time to verify contracts. I've already done the setup for verification so all you nee to do is run the following. Also, for more info, go to [verification docs](https://era.zksync.io/docs/api/hardhat/hardhat-zksync-verify.html#configuration)
+
+```sh
+# verify my coin
+npx hardhat verify --network zkSyncTestnet {MyCoin address}
+# verify casino game. for this one the last 2 are constructor arguments you need to pass
+npx hardhat verify --network zkSyncTestnet {CasinoGame address} {MyCoin address} 42
+
+```
+
+MyCoin was deployed to [0xa74b31DA52977d5d017B32e5f97aC128C24c6ffd](https://goerli.explorer.zksync.io/address/0xa74b31DA52977d5d017B32e5f97aC128C24c6ffd#contrac)
+CasinoGame was deployed to [0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e](https://goerli.explorer.zksync.io/address/0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e#contract)

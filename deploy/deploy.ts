@@ -15,39 +15,61 @@ if (!PRIVATE_KEY) {
 
 // An example of a deploy script that will deploy and call a simple contract.
 export default async function (hre: HardhatRuntimeEnvironment) {
-  console.log(`Running deploy script for the MyCoin contract`);
+  console.log(`Running deploy script for the MyCoin & CasinoGame contracts`);
 
   // Initialize the wallet.
   const wallet = new Wallet(PRIVATE_KEY);
 
   // Create deployer object and load the artifact of the contract you want to deploy.
   const deployer = new Deployer(hre, wallet);
-  const artifact = await deployer.loadArtifact("MyCoin");
+  const myCoinArtifact = await deployer.loadArtifact("MyCoin");
+  const casinoGameArtifact = await deployer.loadArtifact("CasinoGame");
 
-  // Estimate contract deployment fee
-  const deploymentFee = await deployer.estimateDeployFee(artifact, []);
+  const myCoinContract = await deployer.deploy(myCoinArtifact, []);
 
-  // OPTIONAL: Deposit funds to L2
-  // Comment this block if you already have funds on zkSync.
-  const depositHandle = await deployer.zkWallet.deposit({
-    to: deployer.zkWallet.address,
-    token: utils.ETH_ADDRESS,
-    amount: deploymentFee.mul(2),
-  });
-  // Wait until the deposit is processed on zkSync
-  await depositHandle.wait();
+  // //obtain the Constructor Arguments
+  // console.log(
+  //   "erc20 constructor args:" + myCoinContract.interface.encodeDeploy([])
+  // );
 
-  // Deploy this contract. The returned object will be of a `Contract` type, similarly to ones in `ethers`.
-  // there are no arguments in the constructor for this contract
-  const parsedFee = ethers.utils.formatEther(deploymentFee.toString());
-  console.log(`The deployment is estimated to cost ${parsedFee} ETH`);
+  console.log(
+    `${myCoinArtifact.contractName} was deployed to ${myCoinContract.address}`
+  );
 
-  const myCoinContract = await deployer.deploy(artifact, []);
+  // for testing & info purposes only. please don't pass secrets into the contract
+  const secretNumber = 42;
 
-  //obtain the Constructor Arguments
-  console.log("constructor args:" + myCoinContract.interface.encodeDeploy([]));
+  // console.log(
+  //   "casinoGameArtifact",
+  //   JSON.stringify(casinoGameArtifact.abi, null, 2)
+  // );
+  // deploy CasinoGame
+  const casinoGameContract = await deployer.deploy(casinoGameArtifact, [
+    // "test",
+    myCoinContract.address,
+    secretNumber,
+  ]);
 
-  // Show the contract info.
-  const contractAddress = myCoinContract.address;
-  console.log(`${artifact.contractName} was deployed to ${contractAddress}`);
+  // console.log(
+  //   "casino game constructor args:" +
+  //     casinoGameContract.interface.encodeDeploy([])
+  // );
+
+  console.log(
+    `${casinoGameArtifact.contractName} was deployed to ${casinoGameContract.address}`
+  );
+
+  // transfer 1_000_000 tokens to the casino game
+  const tx = await myCoinContract
+    .connect(deployer.zkWallet)
+    .mintToAccount(
+      casinoGameContract.address,
+      ethers.utils.parseEther("1000000")
+    );
+
+  console.log("minting 1_000_000 tokens to the casino game...");
+
+  // await tx.wait();
+
+  console.log("minting completed...");
 }

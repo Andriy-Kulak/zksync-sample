@@ -6,11 +6,13 @@
     "start": "next start"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "^0.12.4",
     "bignumber.js": "^9.1.1",
     "ethers": "^5.7.2",
     "next": "latest",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "wagmi": "^0.12.6",
     "zksync-web3": "^0.13.4"
   },
   "devDependencies": {

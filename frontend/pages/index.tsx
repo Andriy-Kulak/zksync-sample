@@ -6,6 +6,7 @@ import casinoGameAbi from "../utils/casinoGameAbi.json";
 import { useState } from "react";
 import BigNumber from "bignumber.js";
 import useGameInit from "../hooks/useGameInit";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   CASINO_GAME_ADDRESS,
   WINNER_TOPIC_HASH,
@@ -17,8 +18,6 @@ const Home: NextPage = () => {
     undefined
   );
   const { gameState, setGameState } = useGameInit();
-
-  console.log("gameState", gameState);
 
   const guessNumber = async (number: number | undefined) => {
     if (!number) {
@@ -95,6 +94,10 @@ const Home: NextPage = () => {
             <div className="px-4 py-6 sm:p-8">
               <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="col-span-full">
+                  <ConnectButton />
+                </div>
+
+                <div className="col-span-full">
                   <h3>
                     <b>
                       {ethers.utils.formatEther(gameState.casinoBalance || 0)}{" "}
@@ -140,10 +143,10 @@ const Home: NextPage = () => {
             </div>
             <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 py-4 px-4 sm:px-8">
               <button
-                // disabled={
-                //   !gameState.isMetaMaskConnected ||
-                //   gameState.chainId !== ZKS_SYNC_GOERLI_TESTNET
-                // }
+                disabled={
+                  !gameState.isMetaMaskConnected ||
+                  gameState.chainId !== ZKS_SYNC_GOERLI_TESTNET
+                }
                 onClick={(e) => {
                   guessNumber(numberGuessed);
                 }}

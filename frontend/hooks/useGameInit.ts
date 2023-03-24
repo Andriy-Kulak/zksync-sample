@@ -23,7 +23,6 @@ const useGameInit = () => {
           // web 3 provider doesn't recognize metamask's listAccounts so we have to cast it to any
           const accounts = await provider.listAccounts();
 
-          console.log("xxx accounts", accounts);
           return accounts.length > 0;
         };
 

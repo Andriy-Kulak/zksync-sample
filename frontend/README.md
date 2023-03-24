@@ -5,6 +5,6 @@ Deployed [https://zksync-sample.vercel.app/](https://zksync-sample.vercel.app/)
 ## To Run Locally
 
 1. `npm install`
-2. `npm dev`
+2. `npm run dev`
 
 This repo is using tailwind css, next.js + typescript

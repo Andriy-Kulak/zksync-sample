@@ -1,22 +1,33 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import * as ethers from "ethers";
 import { Contract, Web3Provider, Provider, Wallet } from "zksync-web3";
 import casinoGameAbi from "../utils/casinoGameAbi.json";
 import { useEffect, useState } from "react";
+import BigNumber from "bignumber.js";
+
+// it wasn't clear to me how to easily parse reciept events so I ended up using the topic hashes I saw in logs to determine if the user won or lost
+const loserTopicHash =
+  "0x190d4f1249f2e21343a1c0910c21ea36d8a8686a1596352ecc15c4d26a988dcd";
+const winnerTopicHash =
+  "0x9c2270628a9b29d30ae96b6c4c14ed646ee134febdce38a5b77f2bde9cea2e20";
+const ZKS_SYNC_GOERLI_TESTNET = 280;
 
 const Home: NextPage = () => {
   const erc20address = "";
   const casinGameAddress = "0xAcDc11Df900624F20A7Fbe85c58cf867C08c279e";
-  const [gameState, setGameState] = useState({
+  const [gameState, setGameState] = useState<{
+    isMetaMaskConnected: boolean;
+    chainId: number | undefined;
+    casinoBalance: string;
+  }>({
     isMetaMaskConnected: false,
     casinoBalance: "",
+    chainId: undefined,
   });
-
-  // Currently, only one environment is supported.
-  //  const provider = new Provider("https://zksync2-testnet.zksync.dev");
-  // Note that we still need to get the Metamask signer
+  const [numberGuessed, setNumberGuessed] = useState<number | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     (async () => {
@@ -26,6 +37,7 @@ const Home: NextPage = () => {
         const signer = provider.getSigner();
         const contract = new Contract(casinGameAddress, casinoGameAbi, signer);
         console.log("contract ", contract);
+
         const casinoBalance = await provider.getBalance(casinGameAddress);
         const isMetaMaskConnected = async () => {
           const accounts = await provider.listAccounts();
@@ -36,116 +48,167 @@ const Home: NextPage = () => {
           casinoBalance: casinoBalance.toString(),
         });
 
+        const network = await provider.getNetwork();
+
         setGameState({
           isMetaMaskConnected: await isMetaMaskConnected(),
+          chainId: network.chainId,
           casinoBalance: casinoBalance.toString(),
         });
 
-        const token = await contract.erc20Token();
-        console.log("token ", token);
+        window?.ethereum.on("chainChanged", () => {
+          window.location.reload();
+        });
+        window?.ethereum.on("accountsChanged", () => {
+          window.location.reload();
+        });
       }
     })();
   }, []);
 
-  const guessNumber = async (number: number) => {
+  // console.log("gameState?.chainId", gameState?.chainId);
+
+  const guessNumber = async (number: number | undefined) => {
     if (window?.ethereum) {
       const provider = new Web3Provider(window?.ethereum);
+
       const signer = provider.getSigner();
       const contract = new Contract(casinGameAddress, casinoGameAbi, signer);
       const options = { value: ethers.utils.parseEther("0.001") };
       const tx = await contract.guess(number, options);
+
+      window.alert(
+        `Transaction submitted! You can check status on https://goerli.explorer.zksync.io/tx/${tx.hash}`
+      );
       console.log("tx ", tx);
-      tx.wait().then((receipt) => {
+      tx.wait().then(async (receipt: any) => {
         console.log("receipt ", receipt);
+        let iface = new ethers.utils.Interface(casinoGameAbi);
+        let isWinner = false;
+        receipt.logs?.forEach((log: any) => {
+          console.log("log.topics[0]", log.topics[0]);
+          if (log.topics[0] == winnerTopicHash) {
+            console.log("loooser :=)");
+            isWinner = true;
+          }
+        });
+
+        if (isWinner) {
+          window.alert(
+            `You won! Check your wallet tx hash https://goerli.explorer.zksync.io/tx/${tx.hash}`
+          );
+        } else {
+          window.alert(
+            `You lost! Try again! tx hash https://goerli.explorer.zksync.io/tx/${tx.hash}`
+          );
+        }
+
+        const casinoBalance = await provider.getBalance(casinGameAddress);
+
+        setGameState({
+          ...gameState,
+          casinoBalance: casinoBalance.toString(),
+        });
+
+        setNumberGuessed(undefined);
       });
     }
   };
 
-  // const zkSyncProvider = new Provider("https://zksync2-testnet.zksync.dev");
-  // const ethProvider = ethers.getDefaultProvider("goerli");
-  // const zkSyncWallet = new Wallet(
-  //   process.env.PRIVATE_KEY as string,
-  //   zkSyncProvider,
-  //   ethProvider
-  // );
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
       <Head>
         <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{" "}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{" "}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
+      <div className="space-y-10 divide-y divide-gray-900/10">
+        <div className="grid grid-cols-1 gap-y-8 gap-x-8 md:grid-cols-3">
+          <div className="px-4 sm:px-0">
+            <h2 className="text-base font-semibold leading-7 text-gray-900">
+              Casino Game
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-gray-600">
+              To Play, please follow the instructions below:
             </p>
-          </a>
+            <ul>
+              <li>1. Connect wallet to metamask & set to zkSync Era Testnet</li>
+              <li>2. It costs 0.001 eth to play the game</li>
+              <li>3. Guess a number between 1 and 10,000</li>
+              <li>
+                4. If you guess the number, you win 80% of what's in the
+                contract <br></br> + some fun stuff
+              </li>
+            </ul>
+          </div>
 
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
+          <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+            <div className="px-4 py-6 sm:p-8">
+              <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                <div className="col-span-full">
+                  <h3>
+                    <b>
+                      {ethers.utils.formatEther(gameState.casinoBalance || "0")}
+                    </b>
+                    ETH in casino
+                  </h3>
+                  <h3>
+                    <b>
+                      {ethers.utils.formatEther(
+                        BigNumber(gameState.casinoBalance || "0")
+                          .multipliedBy(0.8)
+                          .toString()
+                      )}
+                    </b>
+                    ETH you can win :-)
+                  </h3>
+                </div>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
+                <div className="sm:col-span-4">
+                  <label
+                    htmlFor="website"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Guess Number
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      value={String(numberGuessed)}
+                      onChange={(e) => {
+                        setNumberGuessed(Number(e.target.value));
+                      }}
+                      type="number"
+                      name="numberGuessed"
+                      id="numberGuessed"
+                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm p-2 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      placeholder="guess a number :-)"
+                    />
+                  </div>
+                </div>
 
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+                <div className="col-span-full"></div>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 py-4 px-4 sm:px-8">
+              <button
+                disabled={
+                  !gameState.isMetaMaskConnected ||
+                  gameState.chainId !== ZKS_SYNC_GOERLI_TESTNET
+                }
+                onClick={(e) => {
+                  guessNumber(numberGuessed);
+                }}
+                className="rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                {!gameState.isMetaMaskConnected
+                  ? "Please Connect Metamask"
+                  : gameState.chainId !== ZKS_SYNC_GOERLI_TESTNET
+                  ? "Please Switch to ZKSync Goerli Testnet"
+                  : "Submit"}
+              </button>
+            </div>
+          </div>
         </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
-      <h3>{gameState.casinoBalance}</h3>
-      <button onClick={() => guessNumber(1)}>Guess 1</button>
+      </div>
     </div>
   );
 };

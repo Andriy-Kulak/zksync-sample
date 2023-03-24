@@ -140,10 +140,10 @@ const Home: NextPage = () => {
             </div>
             <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 py-4 px-4 sm:px-8">
               <button
-                disabled={
-                  !gameState.isMetaMaskConnected ||
-                  gameState.chainId !== ZKS_SYNC_GOERLI_TESTNET
-                }
+                // disabled={
+                //   !gameState.isMetaMaskConnected ||
+                //   gameState.chainId !== ZKS_SYNC_GOERLI_TESTNET
+                // }
                 onClick={(e) => {
                   guessNumber(numberGuessed);
                 }}

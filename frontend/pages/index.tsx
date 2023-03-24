@@ -18,7 +18,13 @@ const Home: NextPage = () => {
   );
   const { gameState, setGameState } = useGameInit();
 
+  console.log("gameState", gameState);
+
   const guessNumber = async (number: number | undefined) => {
+    if (!number) {
+      return window.alert("Please enter a number");
+    }
+
     const provider = new Web3Provider(window?.ethereum) as any;
 
     const signer = provider.getSigner();

@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import * as ethers from "ethers";
-import { Contract, Web3Provider } from "zksync-web3";
+import { Contract, Provider, Web3Provider } from "zksync-web3";
 import casinoGameAbi from "../utils/casinoGameAbi.json";
 import { useState } from "react";
 import BigNumber from "bignumber.js";
@@ -19,7 +19,7 @@ const Home: NextPage = () => {
   const { gameState, setGameState } = useGameInit();
 
   const guessNumber = async (number: number | undefined) => {
-    const provider = new Web3Provider(window?.ethereum);
+    const provider = new Web3Provider(window?.ethereum) as Provider;
 
     const signer = provider.getSigner();
     const contract = new Contract(CASINO_GAME_ADDRESS, casinoGameAbi, signer);

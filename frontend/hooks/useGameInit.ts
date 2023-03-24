@@ -16,12 +16,12 @@ const useGameInit = () => {
     (async () => {
       // Client-side-only code
       if (window?.ethereum) {
-        const provider = new Web3Provider(window?.ethereum);
+        const provider = new Web3Provider(window?.ethereum) as Provider;
 
         const casinoBalance = await provider.getBalance(CASINO_GAME_ADDRESS);
         const isMetaMaskConnected = async () => {
           // web 3 provider doesn't recognize metamask's listAccounts so we have to cast it to any
-          const accounts = await (provider as any).listAccounts();
+          const accounts = await provider.listAccounts();
           return accounts.length > 0;
         };
 
